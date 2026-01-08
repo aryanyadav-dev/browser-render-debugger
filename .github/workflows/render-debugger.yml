@@ -9,12 +9,10 @@ name: Render Debugger CI
 on:
   push:
     branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
-  # Separate trigger for tags only
-  create:
     tags:
       - 'v*'
+  pull_request:
+    branches: [main, develop]
   workflow_dispatch:
     inputs:
       fail_on_severity:
@@ -264,6 +262,16 @@ jobs:
         run: npm run build
 
       - name: Publish to npm
-        run: npm publish --access public || true
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          
+          # Check if this version already exists on npm
+          if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version 2>/dev/null; then
+            echo "✅ Version ${PACKAGE_VERSION} already published, skipping..."
+          else
+            echo "📦 Publishing ${PACKAGE_NAME}@${PACKAGE_VERSION}..."
+            npm publish --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
