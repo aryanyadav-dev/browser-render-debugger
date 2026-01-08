@@ -1,16 +1,16 @@
 {
   "name": "render-debugger",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "CLI tool for profiling Chromium-based browsers via CDP and identifying rendering bottlenecks with actionable fixes",
-  "author": "Browser Engineering Team",
+  "author": "Aryan Yadav",
   "license": "MIT",
-  "homepage": "https://github.com/browser-engineering/render-debugger#readme",
+  "homepage": "https://github.com/aryanyadav-dev/browser-render-debugger#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/browser-engineering/render-debugger.git"
+    "url": "git+https://github.com/aryanyadav-dev/browser-render-debugger.git"
   },
   "bugs": {
-    "url": "https://github.com/browser-engineering/render-debugger/issues"
+    "url": "https://github.com/aryanyadav-dev/browser-render-debugger/issues"
   },
   "keywords": [
     "browser",
