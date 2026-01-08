@@ -234,7 +234,8 @@ final class FrameSamplerTests: XCTestCase {
         
         session.start(name: "test") { result in
             XCTAssertFalse(result.success)
-            if case TraceSessionError.adminRequired = result.error as? TraceSessionError {
+            if let error = result.error as? TraceSessionError,
+               case .adminRequired = error {
                 expectation.fulfill()
             }
         }
