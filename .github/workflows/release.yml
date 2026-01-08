@@ -162,10 +162,19 @@ jobs:
 
       - name: Publish to npm
         run: |
-          if [ "${{ needs.prepare.outputs.is_prerelease }}" == "true" ]; then
-            npm publish --tag next --access public
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          
+          # Check if this version already exists on npm
+          if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version 2>/dev/null; then
+            echo "✅ Version ${PACKAGE_VERSION} already published, skipping..."
           else
-            npm publish --access public
+            echo "📦 Publishing ${PACKAGE_NAME}@${PACKAGE_VERSION}..."
+            if [ "${{ needs.prepare.outputs.is_prerelease }}" == "true" ]; then
+              npm publish --tag next --access public
+            else
+              npm publish --access public
+            fi
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
