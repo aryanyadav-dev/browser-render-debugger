@@ -1,0 +1,412 @@
+# Release Workflow for render-debugger
+#
+# This workflow handles automated releases for both:
+# - npm package (render-debugger CLI)
+# - Swift SDK (FrameSampler)
+#
+# Triggered by:
+# - Creating a git tag (v*.*.*)
+# - Manual workflow dispatch
+#
+# Requirements: 15.30
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+      release_npm:
+        description: 'Release npm package'
+        required: true
+        default: true
+        type: boolean
+      release_swift:
+        description: 'Release Swift SDK'
+        required: true
+        default: true
+        type: boolean
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # Job 1: Validate and prepare release
+  prepare:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            IS_PRERELEASE="${{ github.event.inputs.prerelease }}"
+          else
+            # Extract version from tag (remove 'v' prefix)
+            VERSION="${GITHUB_REF#refs/tags/v}"
+            # Check if it's a prerelease (contains alpha, beta, rc)
+            if [[ "$VERSION" =~ (alpha|beta|rc) ]]; then
+              IS_PRERELEASE="true"
+            else
+              IS_PRERELEASE="false"
+            fi
+          fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+          
+          echo "📦 Preparing release v$VERSION"
+          echo "   Pre-release: $IS_PRERELEASE"
+
+      - name: Validate version format
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "❌ Invalid version format: $VERSION"
+            echo "   Expected: X.Y.Z or X.Y.Z-prerelease"
+            exit 1
+          fi
+          echo "✅ Version format valid: $VERSION"
+
+  # Job 2: Run tests before release
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: prepare
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Run integration tests
+        run: npm run test:integration
+
+      - name: Build project
+        run: npm run build
+
+  # Job 3: Build and publish npm package
+  release-npm:
+    name: Release npm Package
+    runs-on: ubuntu-latest
+    needs: [prepare, test]
+    if: github.event_name == 'push' || github.event.inputs.release_npm == 'true'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update package version
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+          echo "📦 Updated package.json to version $VERSION"
+
+      - name: Build project
+        run: npm run build
+
+      - name: Verify build artifacts
+        run: |
+          if [ ! -f "dist/main.js" ]; then
+            echo "❌ Build artifact not found: dist/main.js"
+            exit 1
+          fi
+          echo "✅ Build artifacts verified"
+
+      - name: Publish to npm
+        run: |
+          if [ "${{ needs.prepare.outputs.is_prerelease }}" == "true" ]; then
+            npm publish --tag next --access public
+          else
+            npm publish --access public
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create npm release summary
+        run: |
+          echo "## 📦 npm Package Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Package:** render-debugger" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${{ needs.prepare.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** ${{ needs.prepare.outputs.is_prerelease == 'true' && 'next' || 'latest' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Install with:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.prepare.outputs.is_prerelease }}" == "true" ]; then
+            echo "npm install -g render-debugger@next" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "npm install -g render-debugger" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  # Job 4: Build and release Swift SDK
+  release-swift:
+    name: Release Swift SDK
+    runs-on: macos-latest
+    needs: [prepare, test]
+    if: github.event_name == 'push' || github.event.inputs.release_swift == 'true'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Build Swift SDK
+        working-directory: swift-sdk
+        run: |
+          swift build -c release
+          echo "✅ Swift SDK built successfully"
+
+      - name: Run Swift tests
+        working-directory: swift-sdk
+        run: |
+          swift test
+          echo "✅ Swift tests passed"
+
+      - name: Create Swift SDK archive
+        working-directory: swift-sdk
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          
+          # Create release directory
+          mkdir -p release
+          
+          # Copy source files
+          cp -r Sources release/
+          cp -r Tests release/
+          cp Package.swift release/
+          cp README.md release/
+          cp LICENSE release/ 2>/dev/null || echo "No LICENSE file"
+          
+          # Create archive
+          cd release
+          zip -r "../FrameSampler-${VERSION}.zip" .
+          cd ..
+          
+          # Create checksum
+          shasum -a 256 "FrameSampler-${VERSION}.zip" > "FrameSampler-${VERSION}.zip.sha256"
+          
+          echo "✅ Created FrameSampler-${VERSION}.zip"
+
+      - name: Upload Swift SDK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: swift-sdk-${{ needs.prepare.outputs.version }}
+          path: |
+            swift-sdk/FrameSampler-*.zip
+            swift-sdk/FrameSampler-*.sha256
+          retention-days: 90
+
+      - name: Create Swift release summary
+        run: |
+          echo "## 🍎 Swift SDK Built" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Package:** FrameSampler" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${{ needs.prepare.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Add to Package.swift:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`swift" >> $GITHUB_STEP_SUMMARY
+          echo ".package(url: \"https://github.com/${{ github.repository }}.git\", from: \"${{ needs.prepare.outputs.version }}\")" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  # Job 5: Create GitHub Release
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [prepare, release-npm, release-swift]
+    if: always() && needs.prepare.result == 'success' && (needs.release-npm.result == 'success' || needs.release-swift.result == 'success')
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Swift SDK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: swift-sdk-${{ needs.prepare.outputs.version }}
+          path: artifacts
+        continue-on-error: true
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          TAG="${{ needs.prepare.outputs.tag }}"
+          
+          # Get previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          echo "## What's Changed" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          
+          if [ -n "$PREV_TAG" ]; then
+            # Generate changelog from commits
+            git log --pretty=format:"- %s (%h)" "$PREV_TAG"..HEAD >> CHANGELOG.md
+          else
+            echo "- Initial release" >> CHANGELOG.md
+          fi
+          
+          echo "" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "## Installation" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### npm (CLI)" >> CHANGELOG.md
+          echo "\`\`\`bash" >> CHANGELOG.md
+          echo "npm install -g render-debugger@$VERSION" >> CHANGELOG.md
+          echo "\`\`\`" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### Swift Package Manager" >> CHANGELOG.md
+          echo "\`\`\`swift" >> CHANGELOG.md
+          echo ".package(url: \"https://github.com/${{ github.repository }}.git\", from: \"$VERSION\")" >> CHANGELOG.md
+          echo "\`\`\`" >> CHANGELOG.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.prepare.outputs.tag }}
+          name: Release ${{ needs.prepare.outputs.tag }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: ${{ needs.prepare.outputs.is_prerelease == 'true' }}
+          files: |
+            artifacts/FrameSampler-*.zip
+            artifacts/FrameSampler-*.sha256
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release summary
+        run: |
+          echo "## 🚀 Release Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${{ needs.prepare.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Pre-release:** ${{ needs.prepare.outputs.is_prerelease }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.release-npm.result }}" == "success" ]; then
+            echo "- ✅ npm package published" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ needs.release-swift.result }}" == "success" ]; then
+            echo "- ✅ Swift SDK released" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Job 6: Version bump (optional, for main branch)
+  version-bump:
+    name: Bump Version
+    runs-on: ubuntu-latest
+    needs: [prepare, create-release]
+    if: github.event_name == 'push' && !contains(needs.prepare.outputs.version, '-')
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Bump to next development version
+        run: |
+          CURRENT="${{ needs.prepare.outputs.version }}"
+          
+          # Parse version components
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+          
+          # Increment patch version
+          NEXT_PATCH=$((PATCH + 1))
+          NEXT_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}-dev"
+          
+          # Update package.json
+          npm version "$NEXT_VERSION" --no-git-tag-version
+          
+          echo "📦 Bumped version to $NEXT_VERSION"
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add package.json
+          git commit -m "chore: bump version to next development cycle [skip ci]" || echo "No changes to commit"
+          git push origin main || echo "Push failed or no changes"
+
+  # Job 7: Notify on failure
+  notify-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [prepare, test, release-npm, release-swift, create-release]
+    if: failure()
+    
+    steps:
+      - name: Create failure summary
+        run: |
+          echo "## ❌ Release Failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "One or more release jobs failed. Please check the workflow logs." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Job Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Prepare: ${{ needs.prepare.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Test: ${{ needs.test.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- npm Release: ${{ needs.release-npm.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Swift Release: ${{ needs.release-swift.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- GitHub Release: ${{ needs.create-release.result }}" >> $GITHUB_STEP_SUMMARY
