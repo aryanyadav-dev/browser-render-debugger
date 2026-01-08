@@ -264,6 +264,6 @@ jobs:
         run: npm run build
 
       - name: Publish to npm
-        run: npm publish || echo "Package version may already exist"
+        run: npm publish --access public || true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
