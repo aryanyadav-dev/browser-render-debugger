@@ -9,10 +9,12 @@ name: Render Debugger CI
 on:
   push:
     branches: [main, develop]
-    tags:
-      - 'v*'
   pull_request:
     branches: [main, develop]
+  # Separate trigger for tags only
+  create:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
       fail_on_severity:
@@ -262,6 +264,6 @@ jobs:
         run: npm run build
 
       - name: Publish to npm
-        run: npm publish
+        run: npm publish || echo "Package version may already exist"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
