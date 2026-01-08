@@ -8,11 +8,15 @@ name: Render Debugger CI
 
 on:
   push:
-    branches: [main, develop]
+    branches:
+      - main
+      - develop
     tags:
       - 'v*'
   pull_request:
-    branches: [main, develop]
+    branches:
+      - main
+      - develop
   workflow_dispatch:
     inputs:
       fail_on_severity:
