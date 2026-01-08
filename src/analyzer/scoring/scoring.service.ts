@@ -13,7 +13,7 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import type { Severity } from '../../shared/types/index.js';
+import type { Severity } from '../../shared/types/index';
 
 /**
  * Confidence level for scoring accuracy
