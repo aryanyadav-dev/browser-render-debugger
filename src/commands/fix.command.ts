@@ -33,8 +33,9 @@ import type {
 @Injectable()
 @Command({
   name: 'fix',
+  aliases: ['f'],
   description: 'Generate and optionally apply patches for performance issues',
-  arguments: '<trace-file>',
+  arguments: '[trace-file]',
 })
 export class FixCommand extends CommandRunner {
   constructor(
@@ -50,13 +51,23 @@ export class FixCommand extends CommandRunner {
     super();
   }
 
-  async run(passedParams: string[], options: FixCommandOptions): Promise<void> {
-    const traceFile = passedParams[0];
+  async run(passedParams: string[], options: FixCommandOptions & { latest?: boolean }): Promise<void> {
+    let traceFile = passedParams[0];
 
-    if (!traceFile) {
-      console.error('● Error: Trace file path is required');
-      console.error('Usage: render-debugger fix <trace-file> [options]');
-      process.exit(1);
+    // Auto-detect latest trace if --latest flag or no trace specified
+    if (options.latest || !traceFile) {
+      console.log('> Searching for latest trace...');
+      const latestTrace = await this.storageService.findLatestTrace();
+      
+      if (!latestTrace) {
+        console.error('● Error: No trace files found');
+        console.error('   Run `render-debugger profile --url <URL>` first to create a trace');
+        console.error('   Or specify a trace file: `render-debugger fix <trace-file>`');
+        process.exit(1);
+      }
+      
+      traceFile = latestTrace;
+      console.log(`> Found: ${traceFile}\n`);
     }
 
     try {
@@ -397,6 +408,15 @@ export class FixCommand extends CommandRunner {
     defaultValue: false,
   })
   parseDryRun(): boolean {
+    return true;
+  }
+
+  @Option({
+    flags: '-l, --latest',
+    description: 'Use the most recent trace file',
+    defaultValue: false,
+  })
+  parseLatest(): boolean {
     return true;
   }
 

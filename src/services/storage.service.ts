@@ -229,4 +229,100 @@ export class StorageService {
   getScenariosDir(): string {
     return this.scenariosDir;
   }
+
+  /**
+   * Find the most recent trace file
+   * Searches in traces directory for the latest trace.json
+   */
+  async findLatestTrace(): Promise<string | null> {
+    try {
+      const entries = await fs.readdir(this.tracesDir, { withFileTypes: true });
+      const dirs = entries.filter((e) => e.isDirectory());
+
+      if (dirs.length === 0) {
+        // Check for direct trace files
+        const files = entries.filter(
+          (e) => e.isFile() && e.name.endsWith('.json'),
+        );
+        if (files.length > 0) {
+          // Sort by modification time
+          const fileStats = await Promise.all(
+            files.map(async (f) => {
+              const filePath = path.join(this.tracesDir, f.name);
+              const stat = await fs.stat(filePath);
+              return { path: filePath, mtime: stat.mtime };
+            }),
+          );
+          fileStats.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
+          return fileStats[0].path;
+        }
+        return null;
+      }
+
+      // Get stats for all directories to find most recent
+      const dirStats = await Promise.all(
+        dirs.map(async (d) => {
+          const dirPath = path.join(this.tracesDir, d.name);
+          const stat = await fs.stat(dirPath);
+          return { name: d.name, path: dirPath, mtime: stat.mtime };
+        }),
+      );
+
+      // Sort by modification time (newest first)
+      dirStats.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
+
+      // Look for trace.json in the most recent directory
+      for (const dir of dirStats) {
+        const tracePath = path.join(dir.path, 'trace.json');
+        if (await this.exists(tracePath)) {
+          return tracePath;
+        }
+      }
+
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * List all available traces with metadata
+   */
+  async listTraces(): Promise<
+    Array<{ name: string; path: string; date: Date }>
+  > {
+    try {
+      const traces: Array<{ name: string; path: string; date: Date }> = [];
+      const entries = await fs.readdir(this.tracesDir, { withFileTypes: true });
+
+      // Check directories
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const tracePath = path.join(this.tracesDir, entry.name, 'trace.json');
+          if (await this.exists(tracePath)) {
+            const stat = await fs.stat(tracePath);
+            traces.push({
+              name: entry.name,
+              path: tracePath,
+              date: stat.mtime,
+            });
+          }
+        } else if (entry.isFile() && entry.name.endsWith('.json')) {
+          const tracePath = path.join(this.tracesDir, entry.name);
+          const stat = await fs.stat(tracePath);
+          traces.push({
+            name: entry.name.replace('.json', ''),
+            path: tracePath,
+            date: stat.mtime,
+          });
+        }
+      }
+
+      // Sort by date (newest first)
+      traces.sort((a, b) => b.date.getTime() - a.date.getTime());
+      return traces;
+    } catch {
+      return [];
+    }
+  }
 }

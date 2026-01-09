@@ -1,6 +1,6 @@
 {
   "name": "render-debugger",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "CLI tool for profiling Chromium-based browsers via CDP and identifying rendering bottlenecks with actionable fixes",
   "author": "Aryan Yadav",
   "license": "MIT",
@@ -69,6 +69,7 @@
     "js-yaml": "^4.1.1",
     "nest-commander": "^3.20.1",
     "reflect-metadata": "^0.2.2",
+    "render-debugger": "^1.6.0",
     "rxjs": "^7.8.1",
     "source-map": "^0.7.6"
   },

@@ -26,14 +26,16 @@ interface CompareCommandOptions {
   failOn?: Severity;
   verbose?: boolean;
   noColor?: boolean;
+  latest?: boolean;
 }
 
 @Injectable()
 @Command({
   name: 'compare',
+  aliases: ['c'],
   description:
     'Compare two trace summaries to identify regressions and improvements',
-  arguments: '<base-trace> <head-trace>',
+  arguments: '<base-trace> [head-trace]',
 })
 export class CompareCommand extends CommandRunner {
   constructor(
@@ -47,12 +49,28 @@ export class CompareCommand extends CommandRunner {
     passedParams: string[],
     options: CompareCommandOptions,
   ): Promise<void> {
-    const [baseTracePath, headTracePath] = passedParams;
+    let [baseTracePath, headTracePath] = passedParams;
 
-    if (!baseTracePath || !headTracePath) {
-      console.error('● Error: Both base and head trace paths are required');
-      console.error('Usage: render-debugger compare <base-trace> <head-trace>');
+    if (!baseTracePath) {
+      console.error('● Error: Base trace path is required');
+      console.error('Usage: render-debugger compare <base-trace> [head-trace]');
+      console.error('       render-debugger compare <base-trace> --latest');
       process.exit(1);
+    }
+
+    // Auto-detect latest trace for head if --latest or no head specified
+    if (options.latest || !headTracePath) {
+      console.log('> Searching for latest trace to compare against...');
+      const latestTrace = await this.storageService.findLatestTrace();
+      
+      if (!latestTrace) {
+        console.error('● Error: No trace files found for comparison');
+        console.error('   Run `render-debugger profile --url <URL>` first to create a trace');
+        process.exit(1);
+      }
+      
+      headTracePath = latestTrace;
+      console.log(`> Found: ${headTracePath}\n`);
     }
 
     try {
@@ -458,6 +476,15 @@ export class CompareCommand extends CommandRunner {
     defaultValue: false,
   })
   parseJson(): boolean {
+    return true;
+  }
+
+  @Option({
+    flags: '-l, --latest',
+    description: 'Compare base against the most recent trace',
+    defaultValue: false,
+  })
+  parseLatest(): boolean {
     return true;
   }
 

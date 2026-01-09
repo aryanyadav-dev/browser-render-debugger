@@ -45,76 +45,74 @@ npm install -g render-debugger
 render-debugger init --browser-path /path/to/chrome
 
 # Profile a page
-render-debugger profile --url "https://example.com" --scenario scroll-heavy
+render-debugger profile --url "https://example.com"
 
-# Analyze the trace
-render-debugger analyze .render-debugger/traces/<run>/trace.json --name "my-analysis"
+# Analyze (auto-detects latest trace)
+render-debugger a
 
-# Compare traces for regressions
-render-debugger compare baseline.json current.json --fail-on high
+# Compare baseline against latest
+render-debugger c baseline.json
 
-# Generate fixes
-render-debugger fix trace.json --dry-run
+# Generate fixes (auto-detects latest trace)
+render-debugger f
 ```
 
 ## CLI Commands
 
-| Command | Description |
-|---------|-------------|
-| `init` | Initialize workspace with config and sample scenarios |
-| `profile` | Profile a web page under a specific scenario |
-| `analyze` | Analyze trace data and generate reports |
-| `compare` | Compare two traces for regressions |
-| `fix` | Generate and optionally apply patches |
-| `monitor` | Continuous performance monitoring |
-| `rules list` | Display configured rules |
-| `rules validate` | Validate rules configuration |
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `analyze [trace]` | `a` | Analyze trace (auto-detects latest if omitted) |
+| `profile` | `p` | Profile a web page |
+| `compare <base> [head]` | `c` | Compare traces (uses latest for head if omitted) |
+| `fix [trace]` | `f` | Generate patches (auto-detects latest if omitted) |
+| `monitor` | `m` | Continuous performance monitoring |
+| `init` | - | Initialize workspace |
+| `rules list` | - | Display configured rules |
 
 ## Command Examples
 
-### Profile
-```bash
-render-debugger profile \
-  --url "https://example.com" \
-  --scenario scroll-heavy \
-  --profile-duration 30 \
-  --fps-target 60 \
-  --headless
-```
-
 ### Analyze
 ```bash
-# Terminal report
-render-debugger analyze trace.json --name "homepage"
+# Auto-detect and analyze latest trace
+render-debugger a
 
-# JSON output
-render-debugger analyze trace.json --json report.json
+# Analyze specific trace
+render-debugger a trace.json
 
-# HTML report
-render-debugger analyze trace.json --out report.html
+# With JSON output
+render-debugger a --json report.json
 ```
 
 ### Compare
 ```bash
-render-debugger compare baseline.json current.json --fail-on high --json diff.json
+# Compare baseline against latest trace
+render-debugger c baseline.json
+
+# Compare two specific traces
+render-debugger c baseline.json current.json
+
+# Fail CI on regressions
+render-debugger c baseline.json --fail-on high
 ```
 
 ### Fix
 ```bash
-# Preview mode
-render-debugger fix trace.json --dry-run
+# Preview fixes for latest trace
+render-debugger f
 
 # Auto-apply with Git
-render-debugger fix trace.json --auto-apply --git-branch perf/fixes
+render-debugger f --auto-apply
+```
+
+### Profile
+```bash
+render-debugger p --url "https://example.com"
+render-debugger p --url "https://example.com" --headless --fps-target 60
 ```
 
 ### Monitor
 ```bash
-render-debugger monitor \
-  --url "https://example.com" \
-  --scenario scroll-heavy \
-  --rolling 60 \
-  --alert-cmd "notify-send 'Performance Alert'"
+render-debugger m --url "https://example.com" --rolling 60
 ```
 
 ## CI/CD Integration

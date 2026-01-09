@@ -19,7 +19,8 @@ import { TraceParseError } from '../errors/error-types.js';
 import type { AnalysisReport } from '../reporter/interfaces/index.js';
 
 interface AnalyzeCommandOptions {
-  name: string;
+  name?: string;
+  latest?: boolean;
   fpsTarget?: number;
   json?: string;
   out?: string;
@@ -33,8 +34,9 @@ interface AnalyzeCommandOptions {
 @Injectable()
 @Command({
   name: 'analyze',
+  aliases: ['a'],
   description: 'Analyze a trace file and generate performance reports',
-  arguments: '<trace-file>',
+  arguments: '[trace-file]',
 })
 export class AnalyzeCommand extends CommandRunner {
   constructor(
@@ -53,15 +55,26 @@ export class AnalyzeCommand extends CommandRunner {
     passedParams: string[],
     options: AnalyzeCommandOptions,
   ): Promise<void> {
-    const traceFile = passedParams[0];
+    let traceFile = passedParams[0];
 
-    if (!traceFile) {
-      console.error('● Error: Trace file path is required');
-      console.error(
-        'Usage: render-debugger analyze <trace-file> --name <run-name>',
-      );
-      process.exit(1);
+    // Auto-detect latest trace if --latest flag or no trace specified
+    if (options.latest || !traceFile) {
+      console.log('> Searching for latest trace...');
+      const latestTrace = await this.storageService.findLatestTrace();
+      
+      if (!latestTrace) {
+        console.error('● Error: No trace files found');
+        console.error('   Run `render-debugger profile --url <URL>` first to create a trace');
+        console.error('   Or specify a trace file: `render-debugger analyze <trace-file>`');
+        process.exit(1);
+      }
+      
+      traceFile = latestTrace;
+      console.log(`> Found: ${traceFile}\n`);
     }
+
+    // Auto-generate name if not provided
+    const analysisName = options.name || this.generateAutoName(traceFile);
 
     try {
       console.log('> Starting trace analysis...\n');
@@ -86,7 +99,7 @@ export class AnalyzeCommand extends CommandRunner {
       // Run analysis
       console.log('> Analyzing trace data...');
       const analysisResult = await this.analyzerService.analyze(traceData, {
-        name: options.name,
+        name: analysisName,
         fpsTarget,
         sourceMapPaths: options.sourceMaps,
       });
@@ -130,17 +143,17 @@ export class AnalyzeCommand extends CommandRunner {
 
       // Write HTML report if requested
       if (options.out) {
-        await this.writeHtmlReport(report, options.out, options.name);
+        await this.writeHtmlReport(report, options.out, analysisName);
       }
 
       // Export replay harness if requested (Requirements 11.1, 11.2)
       if (options.exportHarness) {
-        await this.exportReplayHarness(report, options);
+        await this.exportReplayHarness(report, { ...options, name: analysisName });
       }
 
       // Write summary to default location
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const runId = `${options.name}-${timestamp}`;
+      const runId = `${analysisName}-${timestamp}`;
       await this.storageService.writeSummary(runId, report.summary);
 
       console.log('\nArtifacts:');
@@ -157,16 +170,29 @@ export class AnalyzeCommand extends CommandRunner {
       console.log('\n✓ Analysis complete!\n');
       console.log('Next steps:');
       console.log(
-        `  1. Run \`render-debugger fix ${traceFile}\` to generate patches`,
+        `  1. Run \`render-debugger fix\` to generate patches`,
       );
       console.log(
-        `  2. Run \`render-debugger compare <baseline.json> ${traceFile}\` to compare with baseline\n`,
+        `  2. Run \`render-debugger compare <baseline.json>\` to compare with baseline\n`,
       );
 
       process.exit(0);
     } catch (error) {
       this.handleError(error, traceFile);
     }
+  }
+
+  /**
+   * Generate auto name from trace file path
+   */
+  private generateAutoName(tracePath: string): string {
+    const basename = path.basename(tracePath, '.json');
+    if (basename === 'trace') {
+      // Use parent directory name
+      const parentDir = path.basename(path.dirname(tracePath));
+      return parentDir !== 'traces' ? parentDir : 'analysis';
+    }
+    return basename.replace('.trace', '');
   }
 
   /**
@@ -288,11 +314,19 @@ export class AnalyzeCommand extends CommandRunner {
 
   @Option({
     flags: '-n, --name <name>',
-    description: 'Name for this analysis run',
-    required: true,
+    description: 'Name for this analysis run (auto-generated if not provided)',
   })
   parseName(val: string): string {
     return val;
+  }
+
+  @Option({
+    flags: '-l, --latest',
+    description: 'Analyze the most recent trace file',
+    defaultValue: false,
+  })
+  parseLatest(): boolean {
+    return true;
   }
 
   @Option({

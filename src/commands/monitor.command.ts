@@ -39,6 +39,7 @@ const RESET_COLOR = '\x1b[0m';
 @Injectable()
 @Command({
   name: 'monitor',
+  aliases: ['m'],
   description: 'Continuously monitor rendering performance',
 })
 export class MonitorCommand extends CommandRunner {
