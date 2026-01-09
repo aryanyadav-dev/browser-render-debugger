@@ -45,36 +45,55 @@ npm install -g render-debugger
 render-debugger init --browser-path /path/to/chrome
 
 # Profile a page
-render-debugger profile --url "https://example.com" --scenario scroll-heavy
+render-debugger p --url "https://example.com" --scenario scroll-heavy
 
-# Analyze the trace
-render-debugger analyze .render-debugger/traces/<run>/trace.json --name "my-analysis"
+# Analyze (auto-detects latest trace)
+render-debugger a
 
-# Compare traces for regressions
-render-debugger compare baseline.json current.json --fail-on high
+# Compare baseline against latest trace
+render-debugger c baseline.json
 
 # Generate fixes
-render-debugger fix trace.json --dry-run
+render-debugger f
 ```
 
 ## CLI Commands
 
-| Command | Description |
-|---------|-------------|
-| `init` | Initialize workspace with config and sample scenarios |
-| `profile` | Profile a web page under a specific scenario |
-| `analyze` | Analyze trace data and generate reports |
-| `compare` | Compare two traces for regressions |
-| `fix` | Generate and optionally apply patches |
-| `monitor` | Continuous performance monitoring |
-| `rules list` | Display configured rules |
-| `rules validate` | Validate rules configuration |
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `analyze [trace]` | `a` | Analyze trace (auto-detects latest if omitted) |
+| `profile` | `p` | Profile a web page under a specific scenario |
+| `compare <base> [head]` | `c` | Compare traces (uses latest for head if omitted) |
+| `fix [trace]` | `f` | Generate and optionally apply patches |
+| `monitor` | `m` | Continuous performance monitoring |
+| `init` | - | Initialize workspace with config and scenarios |
+| `rules list` | - | Display configured rules |
+| `rules validate` | - | Validate rules configuration |
 
 ## Command Examples
 
+### Analyze
+```bash
+# Auto-detect and analyze latest trace
+render-debugger a
+
+# Analyze specific trace
+render-debugger a trace.json
+
+# With custom name and JSON output
+render-debugger a trace.json --name "homepage" --json report.json
+
+# Generate HTML report
+render-debugger a trace.json --out report.html
+```
+
 ### Profile
 ```bash
-render-debugger profile \
+# Basic profile
+render-debugger p --url "https://example.com" --scenario scroll-heavy
+
+# With options
+render-debugger p \
   --url "https://example.com" \
   --scenario scroll-heavy \
   --profile-duration 30 \
@@ -82,35 +101,37 @@ render-debugger profile \
   --headless
 ```
 
-### Analyze
-```bash
-# Terminal report
-render-debugger analyze trace.json --name "homepage"
-
-# JSON output
-render-debugger analyze trace.json --json report.json
-
-# HTML report
-render-debugger analyze trace.json --out report.html
-```
-
 ### Compare
 ```bash
-render-debugger compare baseline.json current.json --fail-on high --json diff.json
+# Compare baseline against latest trace
+render-debugger c baseline.json
+
+# Compare two specific traces
+render-debugger c baseline.json current.json
+
+# Fail CI on high severity regressions
+render-debugger c baseline.json --fail-on high --json diff.json
 ```
 
 ### Fix
 ```bash
-# Preview mode
-render-debugger fix trace.json --dry-run
+# Preview fixes for latest trace
+render-debugger f
+
+# Preview fixes for specific trace
+render-debugger f trace.json --dry-run
 
 # Auto-apply with Git
-render-debugger fix trace.json --auto-apply --git-branch perf/fixes
+render-debugger f --auto-apply --git-branch perf/fixes
 ```
 
 ### Monitor
 ```bash
-render-debugger monitor \
+# Basic monitoring
+render-debugger m --url "https://example.com" --scenario scroll-heavy
+
+# With rolling window and alerts
+render-debugger m \
   --url "https://example.com" \
   --scenario scroll-heavy \
   --rolling 60 \
@@ -125,9 +146,9 @@ render-debugger monitor \
   run: |
     npm install -g render-debugger
     render-debugger init --browser-path /usr/bin/chromium-browser
-    render-debugger profile --url "$APP_URL" --scenario scroll-heavy --headless
-    render-debugger analyze .render-debugger/traces/*/trace.json --json report.json
-    render-debugger compare baseline.json .render-debugger/traces/*/trace.json --fail-on high
+    render-debugger p --url "$APP_URL" --scenario scroll-heavy --headless
+    render-debugger a --json report.json
+    render-debugger c baseline.json --fail-on high
 ```
 
 ## Exit Codes
