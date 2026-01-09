@@ -33,6 +33,7 @@ import type {
 @Injectable()
 @Command({
   name: 'fix',
+  aliases: ['f'],
   description: 'Generate and optionally apply patches for performance issues',
   arguments: '<trace-file>',
 })

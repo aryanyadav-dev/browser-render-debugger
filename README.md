@@ -113,6 +113,16 @@ render-debugger c baseline.json current.json
 render-debugger c baseline.json --fail-on high --json diff.json
 ```
 
+**Impact Score Interpretation:**
+- **0-40**: Minor changes - Small optimizations or negligible regressions
+- **41-70**: Moderate impact - Noticeable improvements or concerning regressions
+- **71-100**: Major impact - Significant improvements or critical regressions
+
+The impact score uses enterprise-grade weighted scoring:
+- Critical metrics (FPS, dropped frames) weighted 2x
+- Severity-based weighting for regressions (info: 1x, warning: 2x, high: 4x, critical: 8x)
+- Normalized across all detected changes for consistent scoring
+
 ### Fix
 ```bash
 # Preview fixes for latest trace

@@ -31,6 +31,7 @@ interface CompareCommandOptions {
 @Injectable()
 @Command({
   name: 'compare',
+  aliases: ['c'],
   description:
     'Compare two trace summaries to identify regressions and improvements',
   arguments: '<base-trace> <head-trace>',

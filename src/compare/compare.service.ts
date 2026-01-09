@@ -530,8 +530,12 @@ export class CompareService implements ICompareService {
    *
    * The score represents the overall impact of changes:
    * - 0: No significant changes
-   * - 50: Balanced improvements and regressions
-   * - 100: Severe regressions with no improvements
+   * - 1-40: Minor improvements or regressions
+   * - 41-70: Moderate improvements or regressions
+   * - 71-100: Major improvements or severe regressions
+   *
+   * Positive score = improvements, Negative score = regressions
+   * We return absolute value with context from improvements/regressions arrays
    */
   calculateChangeImpactScore(
     regressions: MetricComparison[],
@@ -541,7 +545,7 @@ export class CompareService implements ICompareService {
       return 0;
     }
 
-    // Weight regressions by severity
+    // Weight by severity
     const severityWeights: Record<Severity, number> = {
       info: 1,
       warning: 2,
@@ -557,15 +561,38 @@ export class CompareService implements ICompareService {
       regressionScore += weight * impact;
     }
 
-    // Calculate weighted improvement score
+    // Calculate weighted improvement score (treat improvements as positive impact)
     let improvementScore = 0;
     for (const improvement of improvements) {
+      // Weight improvements by their magnitude
       const impact = Math.min(Math.abs(improvement.percentageChange), 100);
-      improvementScore += impact;
+      // Give more weight to critical metrics (FPS, dropped frames)
+      const weight = improvement.name.toLowerCase().includes('fps') || 
+                     improvement.name.toLowerCase().includes('dropped') ? 2 : 1;
+      improvementScore += weight * impact;
     }
 
-    // Normalize scores
-    const maxPossibleRegression = regressions.length * 8 * 100; // max severity * max percentage
+    // If only improvements, return positive impact score
+    if (regressions.length === 0 && improvements.length > 0) {
+      // Calculate average improvement impact
+      const avgImprovement = improvementScore / improvements.length;
+      // Scale to 0-100, with major improvements (>50% change) scoring high
+      const score = Math.min(100, Math.round(avgImprovement * 0.8));
+      return Math.max(1, score); // Minimum 1 if there are improvements
+    }
+
+    // If only regressions, return negative impact (but we show absolute value)
+    if (improvements.length === 0 && regressions.length > 0) {
+      const maxPossibleRegression = regressions.length * 8 * 100;
+      const normalizedRegression =
+        maxPossibleRegression > 0
+          ? (regressionScore / maxPossibleRegression) * 100
+          : 0;
+      return Math.round(normalizedRegression);
+    }
+
+    // Mixed: calculate net impact
+    const maxPossibleRegression = regressions.length * 8 * 100;
     const maxPossibleImprovement = improvements.length * 100;
 
     const normalizedRegression =
@@ -577,8 +604,7 @@ export class CompareService implements ICompareService {
         ? (improvementScore / maxPossibleImprovement) * 100
         : 0;
 
-    // Calculate final score
-    // Regressions increase score, improvements decrease it
+    // Net score: improvements reduce regression impact
     let score = normalizedRegression - normalizedImprovement * 0.5;
 
     // Clamp to 0-100

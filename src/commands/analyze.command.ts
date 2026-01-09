@@ -33,6 +33,7 @@ interface AnalyzeCommandOptions {
 @Injectable()
 @Command({
   name: 'analyze',
+  aliases: ['a'],
   description: 'Analyze a trace file and generate performance reports',
   arguments: '<trace-file>',
 })

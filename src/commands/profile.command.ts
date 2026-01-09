@@ -36,6 +36,7 @@ interface ProfileCommandOptions {
 @Injectable()
 @Command({
   name: 'profile',
+  aliases: ['p'],
   description: 'Profile a web page under a specific scenario',
 })
 export class ProfileCommand extends CommandRunner {
