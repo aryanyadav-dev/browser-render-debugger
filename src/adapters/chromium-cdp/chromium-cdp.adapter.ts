@@ -34,6 +34,7 @@ import {
   generateTraceId,
 } from '../models/index.js';
 import type { TraceEvent } from '../../shared/types/index.js';
+import { DEFAULT_TRACE_CATEGORIES } from '../../cdp/tracing.service.js';
 
 /**
  * CDP-specific connection options
@@ -79,20 +80,6 @@ interface CDPClient {
     }): Promise<unknown>;
   };
 }
-
-/**
- * Default trace categories for comprehensive rendering analysis
- */
-const DEFAULT_TRACE_CATEGORIES = [
-  'devtools.timeline',
-  'blink.user_timing',
-  'gpu',
-  'v8.execute',
-  'disabled-by-default-devtools.timeline',
-  'disabled-by-default-devtools.timeline.frame',
-  'disabled-by-default-devtools.timeline.stack',
-  'disabled-by-default-v8.cpu_profiler',
-];
 
 const DEFAULT_CDP_PORT = 9222;
 const DEFAULT_CDP_HOST = 'localhost';
