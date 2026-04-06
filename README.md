@@ -3,7 +3,7 @@
 A CLI tool for profiling Chromium-based browsers via CDP and identifying rendering bottlenecks with actionable fixes.
 
 [![npm version](https://img.shields.io/npm/v/render-debugger.svg)](https://www.npmjs.com/package/render-debugger)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 ## Architecture
 
@@ -205,4 +205,4 @@ render-debugger m \
 
 ## License
 
-MIT © Aryan Yadav
+AGPL-3.0-or-later © Aryan Yadav

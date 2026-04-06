@@ -3,7 +3,7 @@
   "version": "1.6.6-dev",
   "description": "CLI tool for profiling Chromium-based browsers via CDP and identifying rendering bottlenecks with actionable fixes",
   "author": "Aryan Yadav",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "homepage": "https://github.com/aryanyadav-dev/browser-render-debugger#readme",
   "repository": {
     "type": "git",

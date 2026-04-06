@@ -280,4 +280,4 @@ render-debugger compare baseline.json current.json --fail-on high
 
 ## License
 
-MIT License - See LICENSE file for details
+AGPL-3.0-or-later - See the repository root LICENSE file for details
