@@ -8,6 +8,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
+interface FrameData { 
+  frames: number; 
+  duration: number; 
+}
+
 test.describe('Analyze Command E2E', () => {
   let tempDir: string;
 
@@ -105,6 +110,6 @@ test.describe('Analyze Command E2E', () => {
     });
 
     expect(frameData).toBeDefined();
-    expect((frameData as any).frames).toBeGreaterThan(0);
+    expect((frameData as FrameData).frames).toBeGreaterThan(0);
   });
 });
