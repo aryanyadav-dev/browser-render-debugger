@@ -129,7 +129,10 @@ export class ProjectContextService {
 
     try {
       const packageContent = await readFile(packageJsonPath, 'utf-8');
-      const packageJson = JSON.parse(packageContent);
+      const packageJson = JSON.parse(packageContent) as {
+        dependencies?: Record<string, string>;
+        devDependencies?: Record<string, string>;
+      };
       dependencies = Object.keys(packageJson.dependencies || {});
       devDependencies = Object.keys(packageJson.devDependencies || {});
     } catch {
@@ -193,10 +196,10 @@ export class ProjectContextService {
     const averageBundleSize = await this.estimateBundleSize(projectPath);
 
     // Find config files
-    const configFiles = await this.findConfigFiles(projectPath);
+    const configFiles = this.findConfigFiles(projectPath);
 
     // Find entry points
-    const entryPoints = await this.findEntryPoints(projectPath);
+    const entryPoints = this.findEntryPoints(projectPath);
 
     return {
       framework,
@@ -314,7 +317,7 @@ export class ProjectContextService {
     return size;
   }
 
-  private async findConfigFiles(projectPath: string): Promise<string[]> {
+  private findConfigFiles(projectPath: string): string[] {
     const configFiles = [
       'vite.config.ts',
       'vite.config.js',
@@ -342,7 +345,7 @@ export class ProjectContextService {
     return found;
   }
 
-  private async findEntryPoints(projectPath: string): Promise<string[]> {
+  private findEntryPoints(projectPath: string): string[] {
     const possibleEntries = [
       'src/main.ts',
       'src/main.js',
@@ -372,7 +375,7 @@ export class ProjectContextService {
     selector: string,
   ): Promise<string[]> {
     const files: string[] = [];
-    const normalizedSelector = selector.replace(/[#.\[\]]/g, '');
+    const normalizedSelector = selector.replace(/[#.\[\]]/g, ''); // eslint-disable-line no-useless-escape
 
     const searchDirs = ['src', 'app', 'components', 'pages', 'lib'];
     for (const dir of searchDirs) {

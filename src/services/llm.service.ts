@@ -104,7 +104,9 @@ export class LLMService {
   isConfigured(): boolean {
     return (
       this.config !== null &&
-      (this.openaiClient !== null || this.geminiClient !== null || this.anthropicClient !== null)
+      (this.openaiClient !== null ||
+        this.geminiClient !== null ||
+        this.anthropicClient !== null)
     );
   }
 
@@ -177,7 +179,8 @@ export class LLMService {
           model: this.config!.model,
           max_tokens: this.config!.maxTokens,
           temperature: this.config!.temperature,
-          system: 'You are a web performance expert. Analyze trace events and identify performance issues not covered by standard detectors. Return only valid JSON.',
+          system:
+            'You are a web performance expert. Analyze trace events and identify performance issues not covered by standard detectors. Return only valid JSON.',
           messages: [
             {
               role: 'user',
@@ -186,7 +189,8 @@ export class LLMService {
           ],
         });
         const textContent = response.content[0];
-        content = textContent && textContent.type === 'text' ? textContent.text : null;
+        content =
+          textContent && textContent.type === 'text' ? textContent.text : null;
       }
 
       if (!content) {
@@ -266,7 +270,8 @@ export class LLMService {
           model: this.config!.model,
           max_tokens: this.config!.maxTokens,
           temperature: this.config!.temperature,
-          system: 'You are a web performance expert. Given a performance issue and project context, suggest a specific, actionable fix tailored to the technology stack. Return only valid JSON.',
+          system:
+            'You are a web performance expert. Given a performance issue and project context, suggest a specific, actionable fix tailored to the technology stack. Return only valid JSON.',
           messages: [
             {
               role: 'user',
@@ -275,7 +280,8 @@ export class LLMService {
           ],
         });
         const textContent = response.content[0];
-        content = textContent && textContent.type === 'text' ? textContent.text : null;
+        content =
+          textContent && textContent.type === 'text' ? textContent.text : null;
       }
 
       if (!content) {
