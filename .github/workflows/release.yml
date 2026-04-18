@@ -8,8 +8,6 @@
 # - Creating a git tag (v*.*.*)
 # - Manual workflow dispatch
 #
-# Requirements: 15.30
-
 name: Release
 
 on:
