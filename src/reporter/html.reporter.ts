@@ -2,7 +2,6 @@
  * HTML Reporter
  * Generates interactive static HTML reports with embedded CSS/JS
  *
- * Requirements: 3.8
  */
 
 import { Injectable } from '@nestjs/common';

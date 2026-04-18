@@ -2,7 +2,6 @@
  * Dry Run Service
  * Preview patches without applying them
  *
- * Requirements: 5.3
  * - Write patches to .render-debugger/patches/<name>.patch without applying
  * - Show what would change
  */

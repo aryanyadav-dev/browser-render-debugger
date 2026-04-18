@@ -4,7 +4,6 @@
  * This model defines a common interface that all browser adapters normalize to,
  * enabling the analyzer to work with traces from different sources (CDP, native WebKit, etc.)
  *
- * Requirements: 15.1, 15.2
  */
 
 /**

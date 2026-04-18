@@ -4,7 +4,6 @@
  * Defines the contract for browser adapters that collect trace data
  * from different browser platforms (Chromium CDP, WebKit native, etc.)
  *
- * Requirements: 15.3
  */
 
 import type { TraceSnapshot, TraceSnapshotOptions } from '../models/index.js';

@@ -6,6 +6,8 @@ import { SourceMapService } from './sourcemap.service.js';
 import { TraceLifecycleService } from './trace-lifecycle.service.js';
 import { SamplingService } from './sampling.service.js';
 import { PrivacyService } from './privacy.service.js';
+import { LLMService } from './llm.service.js';
+import { ProjectContextService } from './project-context.service.js';
 
 @Global()
 @Module({
@@ -20,6 +22,8 @@ import { PrivacyService } from './privacy.service.js';
     TraceLifecycleService,
     SamplingService,
     PrivacyService,
+    LLMService,
+    ProjectContextService,
   ],
   exports: [
     StorageService,
@@ -29,6 +33,8 @@ import { PrivacyService } from './privacy.service.js';
     TraceLifecycleService,
     SamplingService,
     PrivacyService,
+    LLMService,
+    ProjectContextService,
   ],
 })
 export class ServicesModule {}

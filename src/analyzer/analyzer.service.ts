@@ -4,7 +4,6 @@
  * Supports both raw CDP TraceData and normalized TraceSnapshot for
  * platform-agnostic analysis across different browser adapters.
  *
- * Requirements: 15.20, 15.21
  */
 
 import { Injectable, Logger } from '@nestjs/common';

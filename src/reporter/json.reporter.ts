@@ -2,7 +2,6 @@
  * JSON Reporter
  * Generates machine-readable JSON reports conforming to TraceSummary schema
  *
- * Requirements: 3.7, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7
  */
 
 import { Injectable } from '@nestjs/common';

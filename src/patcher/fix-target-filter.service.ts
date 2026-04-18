@@ -5,7 +5,6 @@
  * Auto-patching applies ONLY to JS/CSS resources.
  * Native Swift code is NOT auto-modified - only suggestions are provided.
  *
- * Requirements: 15.22
  */
 
 import { Injectable } from '@nestjs/common';

@@ -2,7 +2,6 @@
  * JS Suggester
  * Generates JavaScript-based fix suggestions for long task issues
  *
- * Requirements: 10.10, 10.11, 10.12, 10.13
  * - Recommends batching DOM writes
  * - Recommends debounce patterns
  * - Recommends moving work to Web Workers

@@ -2,7 +2,6 @@
  * Compare Command
  * Compares two trace summaries to identify regressions and improvements
  *
- * Requirements: 4.4, 4.5, 4.6
  */
 
 import { Command, CommandRunner, Option } from 'nest-commander';

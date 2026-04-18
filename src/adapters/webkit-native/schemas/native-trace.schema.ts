@@ -5,7 +5,6 @@
  * This schema is used by the WebKit Native Adapter to ingest sanitized
  * JSON traces from the Swift instrumentation SDK.
  *
- * Requirements: 15.10
  */
 
 /**

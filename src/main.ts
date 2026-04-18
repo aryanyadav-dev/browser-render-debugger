@@ -24,7 +24,6 @@
  *   40-49: Rule errors
  *   50-59: CI failures (severity threshold exceeded)
  *
- * Requirements: 12.1
  */
 
 import { CommandFactory } from 'nest-commander';

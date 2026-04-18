@@ -85,7 +85,7 @@ test.describe('Profile Command E2E', () => {
     fs.writeFileSync(testPagePath, testPageContent);
 
     await page.goto(`file://${testPagePath}`);
-    
+
     // Wait for JS execution
     await page.waitForTimeout(100);
 
@@ -99,7 +99,7 @@ test.describe('Profile Command E2E', () => {
 
     // Collect performance entries
     const entries = await page.evaluate(() => {
-      return performance.getEntriesByType('navigation').map(e => ({
+      return performance.getEntriesByType('navigation').map((e) => ({
         name: e.name,
         duration: e.duration,
         startTime: e.startTime,

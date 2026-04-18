@@ -1,7 +1,6 @@
 /**
  * SourceMap Service
  * Resolves stack traces to original source locations using source maps.
- * Requirements: 3.11
  */
 
 import { Injectable } from '@nestjs/common';

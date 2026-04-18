@@ -2,7 +2,6 @@
  * Terminal Reporter
  * Generates human-friendly terminal output with emojis and formatting
  *
- * Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6
  */
 
 import { Injectable } from '@nestjs/common';
@@ -313,9 +312,7 @@ export class TerminalReporter {
       // Find matching suggestion
       const suggestion = this.findMatchingSuggestion(detection, suggestions);
       if (suggestion) {
-        lines.push(
-          `     ${c.green}Fix:${c.reset} ${suggestion.description}`,
-        );
+        lines.push(`     ${c.green}Fix:${c.reset} ${suggestion.description}`);
         lines.push(
           `     ${c.green}Est. Speedup:${c.reset} ${suggestion.estimatedSpeedupPct}%`,
         );

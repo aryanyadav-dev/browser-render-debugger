@@ -1,7 +1,6 @@
 /**
  * Compare module interfaces
  *
- * Requirements: 4.1, 4.2, 4.3
  */
 
 import type { TraceSummary, Severity } from '../../shared/types/index.js';

@@ -2,7 +2,6 @@
  * SpeedupCalculator Service
  * Provides conservative speedup estimation with efficiency factors
  *
- * Requirements: 10.14, 10.15
  */
 
 import { Injectable } from '@nestjs/common';

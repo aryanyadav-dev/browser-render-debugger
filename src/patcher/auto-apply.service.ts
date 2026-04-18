@@ -2,7 +2,6 @@
  * Auto Apply Service
  * Applies patches with safety checks
  *
- * Requirements: 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 5.10, 5.11, 5.13
  * - Require Git repo for auto-apply
  * - Create branch for changes
  * - Create backup commit before applying

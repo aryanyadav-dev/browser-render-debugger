@@ -8,16 +8,18 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
-interface FrameData { 
-  frames: number; 
-  duration: number; 
+interface FrameData {
+  frames: number;
+  duration: number;
 }
 
 test.describe('Analyze Command E2E', () => {
   let tempDir: string;
 
   test.beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'render-debugger-analyze-'));
+    tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'render-debugger-analyze-'),
+    );
   });
 
   test.afterEach(() => {
@@ -45,11 +47,11 @@ test.describe('Analyze Command E2E', () => {
     // Get trace data
     const traceData = await page.evaluate(() => {
       return {
-        entries: performance.getEntriesByType('mark').map(e => ({
+        entries: performance.getEntriesByType('mark').map((e) => ({
           name: e.name,
           startTime: e.startTime,
         })),
-        measures: performance.getEntriesByType('measure').map(e => ({
+        measures: performance.getEntriesByType('measure').map((e) => ({
           name: e.name,
           duration: e.duration,
         })),
@@ -71,10 +73,10 @@ test.describe('Analyze Command E2E', () => {
       // Read layout property
       const width = el!.offsetWidth;
       // Write to style (forces reflow)
-      el!.style.width = (width + 1) + 'px';
+      el!.style.width = width + 1 + 'px';
       // Read again (triggers another reflow)
       const newWidth = el!.offsetWidth;
-      
+
       return { width, newWidth };
     });
 
@@ -88,14 +90,16 @@ test.describe('Analyze Command E2E', () => {
   });
 
   test('should measure frame timing', async ({ page }) => {
-    await page.goto('data:text/html,<html><body>Frame Timing Test</body></html>');
+    await page.goto(
+      'data:text/html,<html><body>Frame Timing Test</body></html>',
+    );
 
     // Collect frame timing data
     const frameData = await page.evaluate(() => {
       return new Promise((resolve) => {
         let frames = 0;
         const startTime = performance.now();
-        
+
         function countFrames() {
           frames++;
           if (performance.now() - startTime < 1000) {
@@ -104,7 +108,7 @@ test.describe('Analyze Command E2E', () => {
             resolve({ frames, duration: performance.now() - startTime });
           }
         }
-        
+
         requestAnimationFrame(countFrames);
       });
     });

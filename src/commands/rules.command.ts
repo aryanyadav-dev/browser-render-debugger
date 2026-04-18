@@ -2,7 +2,6 @@
  * Rules Commands
  * Manages performance rules - list and validate
  *
- * Requirements: 7.1, 7.2
  */
 
 import { Command, CommandRunner, SubCommand, Option } from 'nest-commander';

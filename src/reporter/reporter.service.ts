@@ -2,7 +2,6 @@
  * Reporter Service
  * Orchestrates report generation across terminal, JSON, and HTML formats
  *
- * Requirements: 3.6, 3.7, 3.8, 9.1-9.7
  */
 
 import { Injectable } from '@nestjs/common';

@@ -1,6 +1,6 @@
 {
   "name": "render-debugger",
-  "version": "1.6.7",
+  "version": "1.6.8",
   "description": "CLI tool for profiling Chromium-based browsers via CDP and identifying rendering bottlenecks with actionable fixes",
   "author": "Aryan Yadav",
   "license": "AGPL-3.0-or-later",
@@ -64,12 +64,15 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.90.0",
+    "@google/genai": "^1.50.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "chrome-remote-interface": "^0.33.3",
     "js-yaml": "^4.1.1",
     "nest-commander": "^3.20.1",
+    "openai": "^6.34.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "source-map": "^0.7.6"

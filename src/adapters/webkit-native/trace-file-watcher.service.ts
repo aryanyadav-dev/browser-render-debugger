@@ -5,7 +5,6 @@
  * Auto-ingests new trace files as they appear, enabling continuous monitoring
  * workflows with WebKit native browsers.
  *
- * Requirements: 15.11
  */
 
 import { Logger } from '@nestjs/common';

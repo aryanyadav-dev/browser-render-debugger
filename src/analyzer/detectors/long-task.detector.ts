@@ -2,7 +2,6 @@
  * Long Task Correlator
  * Detects JavaScript tasks >50ms and correlates them with frame drops
  *
- * Requirements: 15.20
  */
 
 import { Injectable } from '@nestjs/common';

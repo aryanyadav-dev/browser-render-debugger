@@ -2,7 +2,6 @@
  * Heavy Paint Detector
  * Detects expensive paint and rasterization events
  *
- * Requirements: 15.20
  */
 
 import { Injectable } from '@nestjs/common';

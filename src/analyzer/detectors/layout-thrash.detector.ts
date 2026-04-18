@@ -2,7 +2,6 @@
  * Layout Thrash Detector
  * Detects read-after-write patterns in trace events that cause forced reflows
  *
- * Requirements: 15.20
  */
 
 import { Injectable } from '@nestjs/common';

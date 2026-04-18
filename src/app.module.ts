@@ -21,7 +21,6 @@
  * - MonitorModule: Continuous performance monitoring
  * - ReplayHarnessModule: Issue reproduction export
  *
- * Requirements: 12.1, 12.6
  */
 
 import { Module } from '@nestjs/common';

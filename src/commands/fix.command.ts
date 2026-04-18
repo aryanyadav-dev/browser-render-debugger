@@ -2,7 +2,6 @@
  * Fix Command
  * Generates and optionally applies patches for identified performance issues
  *
- * Requirements: 5.12, 5.14, 9.7, 15.22
  * - Generate patches for top N issues
  * - Display patch summary with before/after metrics
  * - Support dry-run and auto-apply modes
@@ -286,9 +285,7 @@ export class FixCommand extends CommandRunner {
   private displayNativeSuggestions(
     suggestions: (Suggestion | NativeSuggestion)[],
   ): void {
-    console.log(
-      '\n> Native Code Suggestions (Manual Implementation Required)',
-    );
+    console.log('\n> Native Code Suggestions (Manual Implementation Required)');
     console.log('─'.repeat(55));
     console.log(
       '⚠ The following suggestions are for native code and cannot be auto-patched.',

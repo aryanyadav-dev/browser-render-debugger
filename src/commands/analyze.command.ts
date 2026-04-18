@@ -2,7 +2,6 @@
  * Analyze Command
  * Performs offline analysis of trace data and generates reports
  *
- * Requirements: 3.1, 3.9, 11.1, 11.2
  */
 
 import { Command, CommandRunner, Option } from 'nest-commander';
@@ -78,9 +77,7 @@ export class AnalyzeCommand extends CommandRunner {
 
       // Load source maps if provided
       if (options.sourceMaps && options.sourceMaps.length > 0) {
-        console.log(
-          `> Loading ${options.sourceMaps.length} source map(s)...`,
-        );
+        console.log(`> Loading ${options.sourceMaps.length} source map(s)...`);
         await this.sourceMapService.loadSourceMaps(options.sourceMaps);
       }
 
@@ -230,7 +227,6 @@ export class AnalyzeCommand extends CommandRunner {
 
   /**
    * Export replay harness for local debugging
-   * Requirements: 11.1, 11.2
    */
   private async exportReplayHarness(
     report: AnalysisReport,

@@ -2,7 +2,6 @@
  * Native Suggester
  * Generates human-readable suggestions for Swift/native code issues
  *
- * Requirements: 15.23
  * - Produces human-readable suggestions (not patches)
  * - Includes links to Apple performance documentation
  * - Native Swift code is NOT auto-modified

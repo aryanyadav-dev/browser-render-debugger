@@ -5,7 +5,6 @@
  * Note: This detector requires full CDP access or GPU event capability.
  * It will be skipped for webkit-native adapter which has limited GPU visibility.
  *
- * Requirements: 15.21
  */
 
 import { Injectable } from '@nestjs/common';

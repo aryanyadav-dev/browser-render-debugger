@@ -2,7 +2,6 @@
  * Patch Generator Service
  * Creates diff patches from suggestions
  *
- * Requirements: 5.1, 5.2
  * - Generate patches for top N issues
  * - Apply safety heuristics to ensure patches are safe
  */

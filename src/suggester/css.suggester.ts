@@ -2,7 +2,6 @@
  * CSS Suggester
  * Generates CSS-based fix suggestions for layout and paint issues
  *
- * Requirements: 10.8, 10.9
  * - Produces safe suggestions including contain, will-change, and transforms
  * - Warns on memory/cost tradeoffs for suggestions
  */

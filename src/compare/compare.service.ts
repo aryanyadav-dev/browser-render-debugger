@@ -2,7 +2,6 @@
  * Compare Service
  * Compares two trace summaries to identify regressions and improvements
  *
- * Requirements: 4.1, 4.2, 4.3
  */
 
 import { Injectable } from '@nestjs/common';
@@ -567,8 +566,11 @@ export class CompareService implements ICompareService {
       // Weight improvements by their magnitude
       const impact = Math.min(Math.abs(improvement.percentageChange), 100);
       // Give more weight to critical metrics (FPS, dropped frames)
-      const weight = improvement.name.toLowerCase().includes('fps') || 
-                     improvement.name.toLowerCase().includes('dropped') ? 2 : 1;
+      const weight =
+        improvement.name.toLowerCase().includes('fps') ||
+        improvement.name.toLowerCase().includes('dropped')
+          ? 2
+          : 1;
       improvementScore += weight * impact;
     }
 

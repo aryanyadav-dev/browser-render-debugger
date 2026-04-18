@@ -11,7 +11,7 @@ A CLI tool for profiling Chromium-based browsers via CDP and identifying renderi
 ┌─────────────────────────────────────────────────────────────────┐
 │                         CLI Interface                           │
 ├─────────────────────────────────────────────────────────────────┤
-│  init │ profile │ analyze │ compare │ fix │ monitor │ rules    │
+│  init │ profile │ analyze │ compare │ fix │ monitor │ rules     │
 └───────────────────────────┬─────────────────────────────────────┘
                             │
 ┌───────────────────────────▼─────────────────────────────────────┐
@@ -36,6 +36,42 @@ A CLI tool for profiling Chromium-based browsers via CDP and identifying renderi
 
 ```bash
 npm install -g render-debugger
+```
+
+## AI-Powered Features 
+
+render-debugger can use AI to detect novel performance patterns and suggest context-aware fixes tailored to your project.
+
+### Setup
+
+Set one of these environment variables:
+
+```bash
+# Option 1: Google Gemini (recommended, free tier available)
+export GEMINI_API_KEY=your_gemini_api_key
+
+# Option 2: OpenAI
+export OPENAI_API_KEY=sk-your_openai_key
+
+# Option 3: Anthropic (Claude)
+export ANTHROPIC_API_KEY=your_anthropic_key
+```
+
+**Get your free Gemini API key:** https://ai.google.dev/gemini-api/docs/api-key
+
+### How it works
+
+When AI is configured, render-debugger will:
+- Detect novel performance patterns not covered by rule-based detectors
+- Analyze your project (React/Vue/Angular/etc.) for framework-specific issues  
+- Suggest fixes tailored to your codebase structure and dependencies
+- Provide estimated speedup percentages with confidence levels
+
+### Disable AI features
+
+```bash
+# Unset to use only rule-based detection
+unset GEMINI_API_KEY OPENAI_API_KEY ANTHROPIC_API_KEY
 ```
 
 ## Quick Start

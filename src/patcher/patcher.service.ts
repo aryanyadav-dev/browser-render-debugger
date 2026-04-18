@@ -2,7 +2,6 @@
  * Patcher Service
  * Main service for patch generation and application
  *
- * Requirements: 5.1, 5.2, 5.3, 5.4, 15.22
  */
 
 import { Injectable } from '@nestjs/common';

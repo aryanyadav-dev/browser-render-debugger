@@ -9,7 +9,6 @@
  * - Arc, Dia, Zen (staging/dev builds with CDP enabled)
  * - Any Chromium-based browser with remote-debugging-port enabled
  *
- * Requirements: 15.5, 15.6
  */
 
 import { Logger } from '@nestjs/common';

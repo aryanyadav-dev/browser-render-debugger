@@ -2,7 +2,6 @@
  * Suggester Service
  * Orchestrates suggestion generation from registered suggesters
  *
- * Requirements: 3.10
  */
 
 import { Injectable } from '@nestjs/common';

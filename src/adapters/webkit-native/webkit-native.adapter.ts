@@ -10,7 +10,6 @@
  * - Has limited capabilities (no GPU events, limited DOM signals)
  * - Is designed for production use with sampling controls
  *
- * Requirements: 15.8, 15.9
  */
 
 import { Logger } from '@nestjs/common';

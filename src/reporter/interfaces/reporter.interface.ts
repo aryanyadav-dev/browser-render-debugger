@@ -1,7 +1,6 @@
 /**
  * Reporter interfaces for generating terminal, JSON, and HTML reports
  *
- * Requirements: 3.6, 3.7, 3.8, 9.1-9.7
  */
 
 import type { TraceSummary, Detection } from '../../shared/types/index.js';

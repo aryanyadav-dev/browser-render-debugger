@@ -2,7 +2,6 @@
  * Git Service
  * Handles Git operations for safe patching
  *
- * Requirements: 5.4, 5.6, 5.7, 5.13
  * - Require Git repo for auto-apply
  * - Create branch for changes
  * - Create backup commit before applying

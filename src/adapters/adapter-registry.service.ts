@@ -5,7 +5,6 @@
  * Supports runtime adapter selection via --adapter flag and
  * auto-detection based on browser type.
  *
- * Requirements: 15.4
  */
 
 import { Injectable, Logger } from '@nestjs/common';
